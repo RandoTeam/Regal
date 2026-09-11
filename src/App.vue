@@ -2,26 +2,30 @@
 import { ref } from 'vue';
 import { useI18n } from './i18n';
 import LanguageSelector from './components/LanguageSelector.vue';
+import FoldableTwoPane from './components/foldable/FoldableTwoPane.vue';
+import { useDevicePosture } from './composables/useDevicePosture';
 
 const { t, formatCurrency } = useI18n();
+const { posture, simulatedMode, setSimulatedMode } = useDevicePosture();
 
 const activeTab = ref<'catalog' | 'favorites' | 'compare' | 'basket' | 'leaflets'>('catalog');
 const currentRegion = ref('Praha (všechny obchody)');
 const samplePrice = ref(36.90);
+const searchQuery = ref('');
 </script>
 
 <template>
-  <div class="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
-    <!-- Main Header -->
-    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
+  <div class="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-emerald-500 selection:text-white">
+    <!-- Main Top Bar -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 backdrop-blur sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-emerald-500/20">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-lg shadow-sm shadow-emerald-500/20">
           K
         </div>
         <div>
-          <h1 class="text-base font-bold tracking-tight">
+          <h1 class="text-base font-bold tracking-tight flex items-center">
             {{ t.app.title }}
-            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-semibold ml-1.5">
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold ml-1.5 uppercase">
               {{ t.app.version }}
             </span>
           </h1>
@@ -31,19 +35,50 @@ const samplePrice = ref(36.90);
         </div>
       </div>
 
-      <div class="flex items-center space-x-2.5">
-        <div class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 hidden md:flex items-center space-x-1.5">
+      <div class="flex items-center space-x-2">
+        <!-- Foldable Posture Controls (Interactive Preview) -->
+        <div class="hidden sm:flex items-center space-x-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 text-[11px] font-semibold">
+          <button
+            @click="setSimulatedMode('auto')"
+            class="px-2 py-1 rounded-lg transition-colors cursor-pointer"
+            :class="simulatedMode === 'auto' ? 'bg-white dark:bg-slate-900 shadow-xs text-emerald-600 dark:text-emerald-400' : 'text-slate-500'"
+            title="Auto-detect hardware fold"
+          >
+            Auto
+          </button>
+          <button
+            @click="setSimulatedMode('book')"
+            class="px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center space-x-1"
+            :class="simulatedMode === 'book' ? 'bg-white dark:bg-slate-900 shadow-xs text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500'"
+            title="Foldable Dual-Screen (Book mode)"
+          >
+            <span>📖</span>
+            <span>Fold</span>
+          </button>
+          <button
+            @click="setSimulatedMode('tabletop')"
+            class="px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center space-x-1"
+            :class="simulatedMode === 'tabletop' ? 'bg-white dark:bg-slate-900 shadow-xs text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500'"
+            title="Tabletop Mode (Clamshell 90 deg)"
+          >
+            <span>📐</span>
+            <span>Tabletop</span>
+          </button>
+        </div>
+
+        <!-- Region indicator -->
+        <div class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 hidden lg:flex items-center space-x-1.5">
           <span class="text-slate-400">{{ t.app.region_label }}:</span>
           <span>{{ currentRegion }}</span>
         </div>
 
-        <!-- Language Selector -->
+        <!-- Language Switcher -->
         <LanguageSelector />
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 overflow-x-auto">
+    <!-- Navigation Bar -->
+    <nav class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 overflow-x-auto shrink-0">
       <div class="max-w-7xl mx-auto flex space-x-1 py-1.5 text-xs font-semibold">
         <button
           @click="activeTab = 'catalog'"
@@ -92,117 +127,152 @@ const samplePrice = ref(36.90);
       </div>
     </nav>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
-      <!-- Search & i18n showcase banner -->
-      <div class="rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 text-white p-6 md:p-8 shadow-sm relative overflow-hidden">
-        <div class="relative z-10 max-w-2xl space-y-3">
-          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-xs font-semibold">
-            <span>🇨🇿</span>
-            <span>Česká Republika • i18n v1.2</span>
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {{ t.app.subtitle }}
-          </h2>
-          <p class="text-emerald-50 text-sm leading-relaxed">
-            {{ t.search.placeholder }}
-          </p>
+    <!-- Main Content Wrapped in FoldableTwoPane -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 min-h-0 overflow-hidden flex flex-col">
+      <FoldableTwoPane class="flex-1 min-h-0">
+        <!-- PRIMARY PANE: Search, Categories, Master Product Stream -->
+        <template #primary>
+          <div class="space-y-4 pr-0 lg:pr-2">
+            <!-- Search & Filters -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+              <div class="flex items-center bg-slate-50 dark:bg-slate-800/80 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/60 focus-within:border-emerald-500 transition-colors">
+                <span class="text-slate-400 mr-2">🔍</span>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="t.search.placeholder"
+                  class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+                />
+              </div>
 
-          <!-- Search Input Preview -->
-          <div class="pt-2">
-            <div class="flex items-center bg-white dark:bg-slate-900 rounded-2xl p-1.5 shadow-md max-w-lg border border-white/20">
-              <span class="pl-3 text-slate-400">🔍</span>
-              <input
-                type="text"
-                :placeholder="t.search.placeholder"
-                class="w-full bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
-              />
-              <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-colors">
-                {{ t.search.sort_by }}
-              </button>
+              <!-- Quick Chain Filters -->
+              <div class="flex items-center space-x-1.5 overflow-x-auto text-[11px] font-semibold pt-1">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 cursor-pointer">Vše</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Tesco</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Billa</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Albert</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Lidl</span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Rohlík</span>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Demonstration Grid showing i18n across all sections -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Card 1: Sample Product & Currency -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-          <div class="flex items-center justify-between text-xs text-slate-500">
-            <span class="font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Tesco / Billa</span>
-            <span>{{ t.product.valid_until }}: 8.9.2026</span>
-          </div>
-          <h3 class="font-bold text-base">Coca-Cola Original 2.0 l</h3>
-          <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-slate-900 dark:text-white">{{ formatCurrency(samplePrice) }}</span>
-            <span class="text-xs line-through text-slate-400">{{ formatCurrency(49.90) }}</span>
-            <span class="text-xs px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400 font-bold">-26%</span>
-          </div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-            <div><strong>{{ t.product.origin }}:</strong> Česká republika (Praha 9 – Kyje)</div>
-            <div><strong>{{ t.product.club_price }}:</strong> {{ formatCurrency(samplePrice) }} (Clubcard)</div>
-          </div>
-          <button class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer">
-            + {{ t.product.add_to_basket }}
-          </button>
-        </div>
+            <!-- Representative Product Feed -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <!-- Item 1: Coca Cola 2.0L -->
+              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5 flex flex-col justify-between">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">Tesco • Clubcard</span>
+                    <span class="text-slate-400">{{ t.product.valid_until }}: 8.9.</span>
+                  </div>
+                  <h3 class="font-bold text-sm leading-tight text-slate-900 dark:text-white">Coca-Cola Original 2.0 l</h3>
+                  <p class="text-[11px] text-slate-500">{{ t.product.origin }}: Česká republika (Praha 9 - Kyje)</p>
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-baseline justify-between">
+                  <div>
+                    <span class="text-lg font-black text-slate-900 dark:text-white">{{ formatCurrency(samplePrice) }}</span>
+                    <span class="text-xs line-through text-slate-400 ml-1.5">{{ formatCurrency(49.90) }}</span>
+                  </div>
+                  <span class="text-[11px] font-bold text-emerald-600">18.45 Kč / 1 l</span>
+                </div>
+                <button class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1">
+                  <span>+</span>
+                  <span>{{ t.product.add_to_basket }}</span>
+                </button>
+              </div>
 
-        <!-- Card 2: Basket & Optimizer Demo -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-          <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider">
-            <span>🛒</span>
-            <span>{{ t.basket.title }}</span>
-          </div>
-          <h3 class="font-bold text-base">{{ t.basket.split_recommendation }}</h3>
-          <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-            {{ t.basket.save_amount.replace('{amount}', '84') }}
-          </p>
-          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-xs space-y-1.5">
-            <div class="flex justify-between font-semibold">
-              <span>{{ t.basket.cheapest_single }}:</span>
-              <span>{{ formatCurrency(412) }}</span>
+              <!-- Item 2: Albert 1.5L -->
+              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5 flex flex-col justify-between">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md">Albert • Můj Albert</span>
+                    <span class="text-slate-400">{{ t.product.valid_until }}: 8.9.</span>
+                  </div>
+                  <h3 class="font-bold text-sm leading-tight text-slate-900 dark:text-white">Coca-Cola Original 1.5 l</h3>
+                  <p class="text-[11px] text-slate-500">{{ t.product.origin }}: Česká republika</p>
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-baseline justify-between">
+                  <div>
+                    <span class="text-lg font-black text-slate-900 dark:text-white">{{ formatCurrency(26.90) }}</span>
+                    <span class="text-xs line-through text-slate-400 ml-1.5">{{ formatCurrency(44.90) }}</span>
+                  </div>
+                  <span class="text-[11px] font-bold text-blue-600">17.93 Kč / 1 l</span>
+                </div>
+                <button class="w-full py-2 px-3 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 text-white dark:text-slate-900 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1">
+                  <span>+</span>
+                  <span>{{ t.product.add_to_basket }}</span>
+                </button>
+              </div>
             </div>
-            <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold">
-              <span>Smart Split (Tesco + Lidl):</span>
-              <span>{{ formatCurrency(328) }}</span>
-            </div>
           </div>
-          <button class="w-full py-2.5 px-4 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 text-white dark:text-slate-900 text-xs font-bold transition-colors cursor-pointer">
-            {{ t.basket.optimize_btn }}
-          </button>
-        </div>
+        </template>
 
-        <!-- Card 3: Nutrition & KBJU Demo -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-          <div class="flex items-center space-x-2 text-cyan-600 dark:text-cyan-400 font-bold text-xs uppercase tracking-wider">
-            <span>🥗</span>
-            <span>{{ t.nutrition.title }}</span>
+        <!-- SECONDARY PANE: Optimizer, Live Split Calculations, KBJU dials -->
+        <template #secondary>
+          <div class="space-y-4 pl-0 lg:pl-2">
+            <!-- Secondary Banner / Mode Info -->
+            <div class="p-4 rounded-2xl bg-slate-900 text-white shadow-xs space-y-3 border border-slate-800">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                  <span>📱</span>
+                  <span>Foldable Posture: {{ posture }}</span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded-md bg-white/10 font-mono">W3C Viewport API</span>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                На раскладных смартфонах (Galaxy Z Fold, Pixel Fold) вторичная панель занимает правое крыло экрана, защищая аппаратный сгиб от попадания элементов управления.
+              </p>
+            </div>
+
+            <!-- Basket Optimizer Card -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider">
+                  <span>🛒</span>
+                  <span>{{ t.basket.title }}</span>
+                </div>
+                <span class="text-xs text-slate-400 font-medium">3 položky</span>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-xs space-y-2">
+                <div class="flex items-center justify-between font-bold text-emerald-900 dark:text-emerald-300">
+                  <span>{{ t.basket.split_recommendation }}</span>
+                  <span class="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 rounded-md text-[10px]">{{ t.basket.save_amount.replace('{amount}', '84') }}</span>
+                </div>
+                <div class="text-[11px] text-emerald-700 dark:text-emerald-400">
+                  Tesco (Praha Národní) + Billa (Karlín) • {{ t.basket.travel_friction.replace('{cost}', '15') }}
+                </div>
+              </div>
+
+              <!-- Nutrition Dial Glance -->
+              <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span>🥗 {{ t.nutrition.title }}</span>
+                  <span class="text-emerald-600 font-mono text-[11px]">840 kcal</span>
+                </div>
+                <div class="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                  <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <span class="text-slate-400 block">Bílkoviny</span>
+                    <strong class="text-emerald-600 dark:text-emerald-400 text-xs">56g</strong>
+                  </div>
+                  <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <span class="text-slate-400 block">Sacharidy</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">92g</strong>
+                  </div>
+                  <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <span class="text-slate-400 block">Tuky</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">24g</strong>
+                  </div>
+                  <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
+                    <span class="text-slate-400 block">Vláknina</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">12g</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h3 class="font-bold text-base">{{ t.nutrition.basket_nutrition }}</h3>
-          <div class="grid grid-cols-2 gap-2 text-center text-xs">
-            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-              <div class="text-slate-400 text-[10px]">{{ t.nutrition.calories }}</div>
-              <div class="font-bold text-slate-900 dark:text-white text-sm">840 kcal</div>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-              <div class="text-slate-400 text-[10px]">{{ t.nutrition.protein }}</div>
-              <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">56 g</div>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-              <div class="text-slate-400 text-[10px]">{{ t.nutrition.carbs }}</div>
-              <div class="font-bold text-slate-900 dark:text-white text-sm">92 g</div>
-            </div>
-            <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60">
-              <div class="text-slate-400 text-[10px]">{{ t.nutrition.fat }}</div>
-              <div class="font-bold text-slate-900 dark:text-white text-sm">24 g</div>
-            </div>
-          </div>
-          <div class="text-[11px] text-slate-500 dark:text-slate-400 text-center pt-1 border-t border-slate-100 dark:border-slate-800">
-            {{ t.nutrition.price_per_protein }}: <strong>0.82 Kč / g</strong>
-          </div>
-        </div>
-      </div>
+        </template>
+      </FoldableTwoPane>
     </main>
   </div>
 </template>
