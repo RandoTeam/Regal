@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { Product, Store, PriceRecord, FavoriteItem, BasketItem, Leaflet } from './types';
 
-export class KupiRadarDB extends Dexie {
+export class RegalDB extends Dexie {
   products!: Table<Product, string>;
   stores!: Table<Store, string>;
   prices!: Table<PriceRecord, string>;
@@ -10,7 +10,7 @@ export class KupiRadarDB extends Dexie {
   leaflets!: Table<Leaflet, string>;
 
   constructor() {
-    super('KupiRadarDB');
+    super('RegalDB');
     this.version(1).stores({
       products: 'id, ean, name, brand, category',
       stores: 'id, chainId, city, postalCode, region, isOnline',
@@ -22,4 +22,6 @@ export class KupiRadarDB extends Dexie {
   }
 }
 
-export const db = new KupiRadarDB();
+export type KupiRadarDB = RegalDB;
+export const db = new RegalDB();
+

@@ -27,7 +27,7 @@ const dictionaries: Record<SupportedLocale, TranslationSchema> = {
 
 function detectDefaultLocale(): SupportedLocale {
   if (typeof window === 'undefined') return 'cs';
-  const saved = localStorage.getItem('kupiradar_locale') as SupportedLocale;
+  const saved = (localStorage.getItem('regal_locale') || localStorage.getItem('kupiradar_locale')) as SupportedLocale;
   if (saved && saved in dictionaries) return saved;
 
   const browserLang = navigator.language.slice(0, 2).toLowerCase() as SupportedLocale;
@@ -46,7 +46,7 @@ export function useI18n() {
     if (newLocale in dictionaries) {
       currentLocale.value = newLocale;
       if (typeof window !== 'undefined') {
-        localStorage.setItem('kupiradar_locale', newLocale);
+        localStorage.setItem('regal_locale', newLocale);
         document.documentElement.lang = newLocale;
       }
     }
