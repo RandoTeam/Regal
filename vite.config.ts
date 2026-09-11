@@ -14,14 +14,53 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        navigateFallback: '/index.html',
+        runtimeCaching: [
+          {
+            // Cache images from Unsplash and other external origins
+            urlPattern: /^https:\/\/(images\.unsplash\.com|cdn\..*|.*\.cloudfront\.net)\/.*$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'kupiradar-external-images',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache web fonts
+            urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'kupiradar-google-fonts',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
+      },
       manifest: {
-        name: 'KupiRadar Czech Retail',
+        name: 'KupiRadar Czech Retail — Srovnávač a Košík',
         short_name: 'KupiRadar',
-        description: 'Srovnávač cen a optimalizátor nákupního košíku pro ČR',
+        description: 'Srovnávač cen a optimalizátor nákupního košíku pro Českou republiku',
         theme_color: '#0f172a',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'any',
+        lang: 'cs',
+        categories: ['shopping', 'finance', 'lifestyle'],
         icons: [
           {
             src: '/pwa-192x192.png',
@@ -31,7 +70,36 @@ export default defineConfig({
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/apple-touch-icon.png',
+            sizes: '180x180',
             type: 'image/png'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Katalog potravin',
+            short_name: 'Katalog',
+            description: 'Procházet akční ceny potravin',
+            url: '/#catalog',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Nákupní košík',
+            short_name: 'Košík',
+            description: 'Zobrazit nákupní košík a optimalizátor',
+            url: '/#basket',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }]
+          },
+          {
+            name: 'Akční letáky',
+            short_name: 'Letáky',
+            description: 'Aktuální akční letáky řetězců',
+            url: '/#leaflets',
+            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }]
           }
         ]
       }

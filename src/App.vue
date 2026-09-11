@@ -11,12 +11,14 @@ import CompareView from './components/compare/CompareView.vue';
 import LeafletsView from './components/leaflets/LeafletsView.vue';
 import BasketView from './components/basket/BasketView.vue';
 import { useDevicePosture } from './composables/useDevicePosture';
+import { useOnlineStatus } from './composables/useOnlineStatus';
 import { initializeDatabase } from './data/seedRunner';
 import { productService, favoriteService, basketService } from './db/services';
 import type { ProductWithPrice, RetailChainId } from './db/types';
 
 const { t, formatCurrency } = useI18n();
 const { posture, simulatedMode, setSimulatedMode } = useDevicePosture();
+const { isOnline } = useOnlineStatus();
 
 const activeTab = ref<'catalog' | 'favorites' | 'compare' | 'basket' | 'leaflets'>('catalog');
 const currentRegion = ref('Praha (všechny obchody)');
@@ -199,6 +201,12 @@ onMounted(() => {
         <div class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 hidden lg:flex items-center space-x-1.5">
           <span class="text-slate-400">{{ t.app.region_label }}:</span>
           <span>{{ currentRegion }}</span>
+        </div>
+
+        <!-- Offline indicator -->
+        <div v-if="!isOnline" class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-xs font-bold animate-pulse border border-amber-200 dark:border-amber-800">
+          <span>⚡</span>
+          <span>Offline (IndexedDB)</span>
         </div>
 
         <!-- Language Switcher -->
