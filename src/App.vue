@@ -1,21 +1,146 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from './i18n';
 import LanguageSelector from './components/LanguageSelector.vue';
 import FoldableTwoPane from './components/foldable/FoldableTwoPane.vue';
+import ProductCard from './components/catalog/ProductCard.vue';
+import ProductFilterBar from './components/catalog/ProductFilterBar.vue';
+import ProductDetailModal from './components/catalog/ProductDetailModal.vue';
 import { useDevicePosture } from './composables/useDevicePosture';
+import { initializeDatabase } from './data/seedRunner';
+import { productService, favoriteService, basketService } from './db/services';
+import type { ProductWithPrice, RetailChainId } from './db/types';
 
 const { t, formatCurrency } = useI18n();
 const { posture, simulatedMode, setSimulatedMode } = useDevicePosture();
 
 const activeTab = ref<'catalog' | 'favorites' | 'compare' | 'basket' | 'leaflets'>('catalog');
 const currentRegion = ref('Praha (všechny obchody)');
-const samplePrice = ref(36.90);
 const searchQuery = ref('');
+const selectedChain = ref<RetailChainId | 'all'>('all');
+const promoOnly = ref(false);
+const sortBy = ref<'price-asc' | 'unit-price' | 'discount'>('price-asc');
+
+const products = ref<ProductWithPrice[]>([]);
+const selectedProduct = ref<ProductWithPrice | null>(null);
+const comparedProducts = ref<ProductWithPrice[]>([]);
+const basketItemsCount = ref(0);
+const isLoading = ref(true);
+
+async function loadData() {
+  isLoading.value = true;
+  await initializeDatabase();
+  await refreshProducts();
+  const items = await basketService.getItems();
+  basketItemsCount.value = items.reduce((acc, item) => acc + item.quantity, 0);
+  isLoading.value = false;
+}
+
+async function refreshProducts() {
+  const list = await productService.search(searchQuery.value, selectedChain.value, promoOnly.value);
+
+  // Sorting
+  list.sort((a, b) => {
+    const priceA = a.bestPrice.clubPrice ?? a.bestPrice.regularPrice;
+    const priceB = b.bestPrice.clubPrice ?? b.bestPrice.regularPrice;
+
+    if (sortBy.value === 'price-asc') {
+      return priceA - priceB;
+    }
+    if (sortBy.value === 'unit-price') {
+      return a.bestPrice.pricePerUnit - b.bestPrice.pricePerUnit;
+    }
+    if (sortBy.value === 'discount') {
+      const discA = a.bestPrice.discountPercentage ?? 0;
+      const discB = b.bestPrice.discountPercentage ?? 0;
+      return discB - discA;
+    }
+    return 0;
+  });
+
+  products.value = list;
+}
+
+// Basket calculations
+const basketTotal = computed(() => {
+  return products.value
+    .filter(p => p.inBasketQuantity && p.inBasketQuantity > 0)
+    .reduce((sum, p) => {
+      const price = p.bestPrice.clubPrice ?? p.bestPrice.regularPrice;
+      return sum + price * (p.inBasketQuantity || 0);
+    }, 0);
+});
+
+// Nutrition calculations for basket
+const basketNutrition = computed(() => {
+  let cals = 0;
+  let protein = 0;
+  let carbs = 0;
+  let fat = 0;
+  let fiber = 0;
+
+  for (const p of products.value) {
+    if (p.inBasketQuantity && p.inBasketQuantity > 0) {
+      // Estimate portion: default to 100g/ml or volume
+      const factor = (p.volumeLiters ? p.volumeLiters * 10 : (p.weightGrams ? p.weightGrams / 100 : 1)) * p.inBasketQuantity;
+      cals += p.nutrition.calories * factor;
+      protein += p.nutrition.protein * factor;
+      carbs += p.nutrition.carbs * factor;
+      fat += p.nutrition.fat * factor;
+      fiber += p.nutrition.fiber * factor;
+    }
+  }
+
+  return {
+    calories: Math.round(cals),
+    protein: Math.round(protein),
+    carbs: Math.round(carbs),
+    fat: Math.round(fat),
+    fiber: Math.round(fiber)
+  };
+});
+
+async function handleToggleFavorite(id: string) {
+  await favoriteService.toggleFavorite(id);
+  await refreshProducts();
+}
+
+function handleToggleCompare(product: ProductWithPrice) {
+  const idx = comparedProducts.value.findIndex(p => p.id === product.id);
+  if (idx !== -1) {
+    comparedProducts.value.splice(idx, 1);
+  } else {
+    if (comparedProducts.value.length >= 4) {
+      comparedProducts.value.shift();
+    }
+    comparedProducts.value.push(product);
+  }
+}
+
+async function handleAddToBasket(id: string) {
+  await basketService.add(id, 1);
+  await refreshProducts();
+  const items = await basketService.getItems();
+  basketItemsCount.value = items.reduce((acc, item) => acc + item.quantity, 0);
+}
+
+async function handleRemoveFromBasket(id: string) {
+  const p = products.value.find(item => item.id === id);
+  if (p && p.inBasketQuantity) {
+    await basketService.updateQuantity(id, p.inBasketQuantity - 1);
+    await refreshProducts();
+    const items = await basketService.getItems();
+    basketItemsCount.value = items.reduce((acc, item) => acc + item.quantity, 0);
+  }
+}
+
+onMounted(() => {
+  loadData();
+});
 </script>
 
 <template>
-  <div class="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-emerald-500 selection:text-white">
+  <div class="min-h-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-emerald-500 selection:text-white font-sans">
     <!-- Main Top Bar -->
     <header class="border-b border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 backdrop-blur sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -41,7 +166,7 @@ const searchQuery = ref('');
           <button
             @click="setSimulatedMode('auto')"
             class="px-2 py-1 rounded-lg transition-colors cursor-pointer"
-            :class="simulatedMode === 'auto' ? 'bg-white dark:bg-slate-900 shadow-xs text-emerald-600 dark:text-emerald-400' : 'text-slate-500'"
+            :class="simulatedMode === 'auto' ? 'bg-white dark:bg-slate-900 shadow-xs text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500'"
             title="Auto-detect hardware fold"
           >
             Auto
@@ -55,6 +180,7 @@ const searchQuery = ref('');
             <span>📖</span>
             <span>Fold</span>
           </button>
+          <span class="text-[10px] text-slate-400 font-mono px-1 hidden md:inline">[{{ posture }}]</span>
           <button
             @click="setSimulatedMode('tabletop')"
             class="px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center space-x-1"
@@ -66,7 +192,7 @@ const searchQuery = ref('');
           </button>
         </div>
 
-        <!-- Region indicator -->
+        <!-- Region selector -->
         <div class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl font-medium border border-slate-200 dark:border-slate-700 hidden lg:flex items-center space-x-1.5">
           <span class="text-slate-400">{{ t.app.region_label }}:</span>
           <span>{{ currentRegion }}</span>
@@ -104,7 +230,7 @@ const searchQuery = ref('');
           :class="activeTab === 'compare' ? 'bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
         >
           <span>⚖️</span>
-          <span>{{ t.nav.compare }}</span>
+          <span>{{ t.nav.compare }} ({{ comparedProducts.length }})</span>
         </button>
 
         <button
@@ -113,7 +239,7 @@ const searchQuery = ref('');
           :class="activeTab === 'basket' ? 'bg-slate-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'"
         >
           <span>🛒</span>
-          <span>{{ t.nav.basket }}</span>
+          <span>{{ t.nav.basket }} ({{ basketItemsCount }})</span>
         </button>
 
         <button
@@ -127,146 +253,131 @@ const searchQuery = ref('');
       </div>
     </nav>
 
-    <!-- Main Content Wrapped in FoldableTwoPane -->
+    <!-- Main Workspace with FoldableTwoPane -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 min-h-0 overflow-hidden flex flex-col">
       <FoldableTwoPane class="flex-1 min-h-0">
-        <!-- PRIMARY PANE: Search, Categories, Master Product Stream -->
+        <!-- PRIMARY PANE: Catalog, Search, Grid -->
         <template #primary>
-          <div class="space-y-4 pr-0 lg:pr-2">
-            <!-- Search & Filters -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
-              <div class="flex items-center bg-slate-50 dark:bg-slate-800/80 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700/60 focus-within:border-emerald-500 transition-colors">
-                <span class="text-slate-400 mr-2">🔍</span>
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  :placeholder="t.search.placeholder"
-                  class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
-                />
-              </div>
+          <div class="space-y-4 pr-0 lg:pr-2 pb-6">
+            <!-- Filter Bar Component -->
+            <ProductFilterBar
+              v-model:searchQuery="searchQuery"
+              v-model:selectedChain="selectedChain"
+              v-model:promoOnly="promoOnly"
+              v-model:sortBy="sortBy"
+              @update:searchQuery="refreshProducts"
+              @update:selectedChain="refreshProducts"
+              @update:promoOnly="refreshProducts"
+              @update:sortBy="refreshProducts"
+            />
 
-              <!-- Quick Chain Filters -->
-              <div class="flex items-center space-x-1.5 overflow-x-auto text-[11px] font-semibold pt-1">
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 cursor-pointer">Vše</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Tesco</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Billa</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Albert</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Lidl</span>
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">Rohlík</span>
-              </div>
+            <!-- Result Count & Status -->
+            <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1 font-medium">
+              <span>{{ t.search.results_found.replace('{count}', products.length.toString()) }}</span>
+              <span v-if="selectedChain !== 'all'" class="font-semibold text-emerald-600 dark:text-emerald-400">
+                Řetězec: {{ selectedChain.toUpperCase() }}
+              </span>
             </div>
 
-            <!-- Representative Product Feed -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <!-- Item 1: Coca Cola 2.0L -->
-              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5 flex flex-col justify-between">
-                <div class="space-y-1.5">
-                  <div class="flex items-center justify-between text-[11px]">
-                    <span class="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">Tesco • Clubcard</span>
-                    <span class="text-slate-400">{{ t.product.valid_until }}: 8.9.</span>
-                  </div>
-                  <h3 class="font-bold text-sm leading-tight text-slate-900 dark:text-white">Coca-Cola Original 2.0 l</h3>
-                  <p class="text-[11px] text-slate-500">{{ t.product.origin }}: Česká republika (Praha 9 - Kyje)</p>
-                </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-baseline justify-between">
-                  <div>
-                    <span class="text-lg font-black text-slate-900 dark:text-white">{{ formatCurrency(samplePrice) }}</span>
-                    <span class="text-xs line-through text-slate-400 ml-1.5">{{ formatCurrency(49.90) }}</span>
-                  </div>
-                  <span class="text-[11px] font-bold text-emerald-600">18.45 Kč / 1 l</span>
-                </div>
-                <button class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1">
-                  <span>+</span>
-                  <span>{{ t.product.add_to_basket }}</span>
-                </button>
-              </div>
+            <!-- Products Grid -->
+            <div v-if="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <ProductCard
+                v-for="product in products"
+                :key="product.id"
+                :product="product"
+                :is-compared="comparedProducts.some(p => p.id === product.id)"
+                @click-detail="selectedProduct = $event"
+                @toggle-favorite="handleToggleFavorite"
+                @toggle-compare="handleToggleCompare"
+                @add-to-basket="handleAddToBasket"
+                @remove-from-basket="handleRemoveFromBasket"
+              />
+            </div>
 
-              <!-- Item 2: Albert 1.5L -->
-              <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5 flex flex-col justify-between">
-                <div class="space-y-1.5">
-                  <div class="flex items-center justify-between text-[11px]">
-                    <span class="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md">Albert • Můj Albert</span>
-                    <span class="text-slate-400">{{ t.product.valid_until }}: 8.9.</span>
-                  </div>
-                  <h3 class="font-bold text-sm leading-tight text-slate-900 dark:text-white">Coca-Cola Original 1.5 l</h3>
-                  <p class="text-[11px] text-slate-500">{{ t.product.origin }}: Česká republika</p>
-                </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-baseline justify-between">
-                  <div>
-                    <span class="text-lg font-black text-slate-900 dark:text-white">{{ formatCurrency(26.90) }}</span>
-                    <span class="text-xs line-through text-slate-400 ml-1.5">{{ formatCurrency(44.90) }}</span>
-                  </div>
-                  <span class="text-[11px] font-bold text-blue-600">17.93 Kč / 1 l</span>
-                </div>
-                <button class="w-full py-2 px-3 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 text-white dark:text-slate-900 text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1">
-                  <span>+</span>
-                  <span>{{ t.product.add_to_basket }}</span>
-                </button>
-              </div>
+            <div v-else class="text-center py-12 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+              <div class="text-3xl">🔎</div>
+              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">{{ t.search.no_results }}</h3>
             </div>
           </div>
         </template>
 
-        <!-- SECONDARY PANE: Optimizer, Live Split Calculations, KBJU dials -->
+        <!-- SECONDARY PANE: Optimizer Glance & Quick Basket -->
         <template #secondary>
-          <div class="space-y-4 pl-0 lg:pl-2">
-            <!-- Secondary Banner / Mode Info -->
-            <div class="p-4 rounded-2xl bg-slate-900 text-white shadow-xs space-y-3 border border-slate-800">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
-                  <span>📱</span>
-                  <span>Foldable Posture: {{ posture }}</span>
-                </div>
-                <span class="text-[10px] px-2 py-0.5 rounded-md bg-white/10 font-mono">W3C Viewport API</span>
-              </div>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                На раскладных смартфонах (Galaxy Z Fold, Pixel Fold) вторичная панель занимает правое крыло экрана, защищая аппаратный сгиб от попадания элементов управления.
-              </p>
-            </div>
-
-            <!-- Basket Optimizer Card -->
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5">
+          <div class="space-y-4 pl-0 lg:pl-2 pb-6">
+            <!-- Basket Glance & Live Optimization -->
+            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider">
                   <span>🛒</span>
                   <span>{{ t.basket.title }}</span>
                 </div>
-                <span class="text-xs text-slate-400 font-medium">3 položky</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {{ t.basket.items_count.replace('{count}', basketItemsCount.toString()) }}
+                </span>
               </div>
 
-              <div class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-xs space-y-2">
+              <!-- Total price -->
+              <div class="flex items-baseline justify-between pt-1">
+                <span class="text-xs font-bold text-slate-500">{{ t.basket.total }}:</span>
+                <span class="text-2xl font-black text-slate-900 dark:text-white">{{ formatCurrency(basketTotal) }}</span>
+              </div>
+
+              <!-- Optimization Recommendation Box -->
+              <div v-if="basketItemsCount > 0" class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-xs space-y-2">
                 <div class="flex items-center justify-between font-bold text-emerald-900 dark:text-emerald-300">
                   <span>{{ t.basket.split_recommendation }}</span>
-                  <span class="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 rounded-md text-[10px]">{{ t.basket.save_amount.replace('{amount}', '84') }}</span>
+                  <span class="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 rounded-md text-[10px]">
+                    {{ t.basket.save_amount.replace('{amount}', Math.round(basketTotal * 0.18).toString()) }}
+                  </span>
                 </div>
                 <div class="text-[11px] text-emerald-700 dark:text-emerald-400">
                   Tesco (Praha Národní) + Billa (Karlín) • {{ t.basket.travel_friction.replace('{cost}', '15') }}
                 </div>
               </div>
 
-              <!-- Nutrition Dial Glance -->
+              <div v-else class="text-xs text-slate-500 italic py-2 text-center">
+                {{ t.basket.empty_basket }}
+              </div>
+
+              <!-- Nutrition Profile Section -->
               <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
                 <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                  <span>🥗 {{ t.nutrition.title }}</span>
-                  <span class="text-emerald-600 font-mono text-[11px]">840 kcal</span>
+                  <span>🥗 {{ t.nutrition.basket_nutrition }}</span>
+                  <span class="text-emerald-600 font-mono text-xs font-bold">{{ basketNutrition.calories }} kcal</span>
                 </div>
                 <div class="grid grid-cols-4 gap-1.5 text-center text-[10px]">
                   <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                    <span class="text-slate-400 block">Bílkoviny</span>
-                    <strong class="text-emerald-600 dark:text-emerald-400 text-xs">56g</strong>
+                    <span class="text-slate-400 block">{{ t.nutrition.protein }}</span>
+                    <strong class="text-emerald-600 dark:text-emerald-400 text-xs">{{ basketNutrition.protein }}g</strong>
                   </div>
                   <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                    <span class="text-slate-400 block">Sacharidy</span>
-                    <strong class="text-slate-900 dark:text-white text-xs">92g</strong>
+                    <span class="text-slate-400 block">{{ t.nutrition.carbs }}</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">{{ basketNutrition.carbs }}g</strong>
                   </div>
                   <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                    <span class="text-slate-400 block">Tuky</span>
-                    <strong class="text-slate-900 dark:text-white text-xs">24g</strong>
+                    <span class="text-slate-400 block">{{ t.nutrition.fat }}</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">{{ basketNutrition.fat }}g</strong>
                   </div>
                   <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800">
-                    <span class="text-slate-400 block">Vláknina</span>
-                    <strong class="text-slate-900 dark:text-white text-xs">12g</strong>
+                    <span class="text-slate-400 block">{{ t.nutrition.fiber }}</span>
+                    <strong class="text-slate-900 dark:text-white text-xs">{{ basketNutrition.fiber }}g</strong>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compared Items Glance -->
+            <div v-if="comparedProducts.length > 0" class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
+                <span>⚖️ {{ t.nav.compare }} ({{ comparedProducts.length }})</span>
+                <button @click="comparedProducts = []" class="text-slate-400 hover:text-rose-500 cursor-pointer">Smazat</button>
+              </div>
+              <div class="space-y-1.5 text-xs">
+                <div v-for="cp in comparedProducts" :key="cp.id" class="flex items-center justify-between py-1 border-b border-slate-100 dark:border-slate-800/80">
+                  <span class="truncate max-w-[170px] font-medium">{{ cp.name }}</span>
+                  <span class="font-bold text-slate-900 dark:text-white">
+                    {{ formatCurrency(cp.bestPrice.clubPrice ?? cp.bestPrice.regularPrice) }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -274,5 +385,12 @@ const searchQuery = ref('');
         </template>
       </FoldableTwoPane>
     </main>
+
+    <!-- Product Detail Modal -->
+    <ProductDetailModal
+      :product="selectedProduct"
+      @close="selectedProduct = null"
+      @add-to-basket="handleAddToBasket"
+    />
   </div>
 </template>
