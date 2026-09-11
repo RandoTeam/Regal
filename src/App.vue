@@ -6,6 +6,10 @@ import FoldableTwoPane from './components/foldable/FoldableTwoPane.vue';
 import ProductCard from './components/catalog/ProductCard.vue';
 import ProductFilterBar from './components/catalog/ProductFilterBar.vue';
 import ProductDetailModal from './components/catalog/ProductDetailModal.vue';
+import FavoritesView from './components/favorites/FavoritesView.vue';
+import CompareView from './components/compare/CompareView.vue';
+import LeafletsView from './components/leaflets/LeafletsView.vue';
+import BasketView from './components/basket/BasketView.vue';
 import { useDevicePosture } from './composables/useDevicePosture';
 import { initializeDatabase } from './data/seedRunner';
 import { productService, favoriteService, basketService } from './db/services';
@@ -81,7 +85,6 @@ const basketNutrition = computed(() => {
 
   for (const p of products.value) {
     if (p.inBasketQuantity && p.inBasketQuantity > 0) {
-      // Estimate portion: default to 100g/ml or volume
       const factor = (p.volumeLiters ? p.volumeLiters * 10 : (p.weightGrams ? p.weightGrams / 100 : 1)) * p.inBasketQuantity;
       cals += p.nutrition.calories * factor;
       protein += p.nutrition.protein * factor;
@@ -253,13 +256,13 @@ onMounted(() => {
       </div>
     </nav>
 
-    <!-- Main Workspace with FoldableTwoPane -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 min-h-0 overflow-hidden flex flex-col">
-      <FoldableTwoPane class="flex-1 min-h-0">
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 min-h-0 overflow-y-auto">
+      <!-- 1. Catalog View (with Foldable Two Pane) -->
+      <FoldableTwoPane v-if="activeTab === 'catalog'" class="flex-1 min-h-0">
         <!-- PRIMARY PANE: Catalog, Search, Grid -->
         <template #primary>
           <div class="space-y-4 pr-0 lg:pr-2 pb-6">
-            <!-- Filter Bar Component -->
             <ProductFilterBar
               v-model:searchQuery="searchQuery"
               v-model:selectedChain="selectedChain"
@@ -304,7 +307,6 @@ onMounted(() => {
         <!-- SECONDARY PANE: Optimizer Glance & Quick Basket -->
         <template #secondary>
           <div class="space-y-4 pl-0 lg:pl-2 pb-6">
-            <!-- Basket Glance & Live Optimization -->
             <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase tracking-wider">
@@ -322,22 +324,14 @@ onMounted(() => {
                 <span class="text-2xl font-black text-slate-900 dark:text-white">{{ formatCurrency(basketTotal) }}</span>
               </div>
 
-              <!-- Optimization Recommendation Box -->
-              <div v-if="basketItemsCount > 0" class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-xs space-y-2">
-                <div class="flex items-center justify-between font-bold text-emerald-900 dark:text-emerald-300">
-                  <span>{{ t.basket.split_recommendation }}</span>
-                  <span class="px-2 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-900 dark:text-emerald-100 rounded-md text-[10px]">
-                    {{ t.basket.save_amount.replace('{amount}', Math.round(basketTotal * 0.18).toString()) }}
-                  </span>
-                </div>
-                <div class="text-[11px] text-emerald-700 dark:text-emerald-400">
-                  Tesco (Praha Národní) + Billa (Karlín) • {{ t.basket.travel_friction.replace('{cost}', '15') }}
-                </div>
-              </div>
-
-              <div v-else class="text-xs text-slate-500 italic py-2 text-center">
-                {{ t.basket.empty_basket }}
-              </div>
+              <!-- Quick action to go to basket -->
+              <button
+                @click="activeTab = 'basket'"
+                class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-transform active:scale-98 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Otevřít chytrý košík a optimalizátor</span>
+                <span>→</span>
+              </button>
 
               <!-- Nutrition Profile Section -->
               <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
@@ -380,10 +374,48 @@ onMounted(() => {
                   </span>
                 </div>
               </div>
+              <button 
+                @click="activeTab = 'compare'"
+                class="w-full text-center text-xs text-blue-600 dark:text-blue-400 font-semibold py-1 hover:underline cursor-pointer"
+              >
+                Otevřít detailní srovnání →
+              </button>
             </div>
           </div>
         </template>
       </FoldableTwoPane>
+
+      <!-- 2. Favorites View -->
+      <FavoritesView
+        v-else-if="activeTab === 'favorites'"
+        @click-detail="selectedProduct = $event"
+        @toggle-compare="handleToggleCompare"
+        @add-to-basket="handleAddToBasket"
+        @remove-from-basket="handleRemoveFromBasket"
+        @go-to-catalog="activeTab = 'catalog'"
+      />
+
+      <!-- 3. Compare View -->
+      <CompareView
+        v-else-if="activeTab === 'compare'"
+        :products="comparedProducts"
+        @remove="handleToggleCompare(comparedProducts.find(p => p.id === $event)!)"
+        @clear="comparedProducts = []"
+        @add-to-basket="handleAddToBasket"
+        @go-to-catalog="activeTab = 'catalog'"
+      />
+
+      <!-- 4. Basket View -->
+      <BasketView
+        v-else-if="activeTab === 'basket'"
+        @browse-catalog="activeTab = 'catalog'"
+        @basket-updated="loadData"
+      />
+
+      <!-- 5. Leaflets View -->
+      <LeafletsView
+        v-else-if="activeTab === 'leaflets'"
+      />
     </main>
 
     <!-- Product Detail Modal -->
