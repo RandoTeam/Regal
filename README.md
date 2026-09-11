@@ -2,11 +2,11 @@
   <img src="docs/logo.png" alt="Regál Logo" width="160" height="160" style="border-radius: 36px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);" />
 </p>
 
-<h1 align="center">🏷️ Regál (Česká Republika)</h1>
+<h1 align="center">🏷️ Regál (Česká republika)</h1>
 
 <p align="center">
   <strong>Chytrý nákupní rádce, srovnávač cen a optimalizátor nákupního košíku s nutriční kalkulačkou pro celou ČR.</strong><br>
-  <em>Ультра-легкий кросс-платформенный радар цен, комбинаторный оптимизатор продуктовой корзины и нутрициологический калькулятор (КБЖУ).</em>
+  <em>Ultra-lightweight cross-platform retail price comparison, combinatorial basket optimizer with travel friction model, and KBJU nutrition tracker for Web/PWA, Desktop, Mobile & Foldables.</em>
 </p>
 
 <p align="center">
@@ -21,122 +21,122 @@
 
 ---
 
-> 💡 **Проект независимого разработчика**: Regál полностью спроектирован, разработан и поддерживается одним человеком. В приложении принципиально нет коммерческой рекламы сетей, платных накруток супермаркетов и скрытых трекеров. Если сервис помогает вам экономить семейный бюджет и время в магазинах Чехии, поддержите разработку физического тестирования и инфраструктуры в [Разделе поддержки (Donation Zone)](#-поддержка-автора-и-развития-проекта-donation-zone).
+> 💡 **Projekt nezávislého vývojáře**: Regál je kompletně navržen, vyvíjen a spravován jediným nezávislým inženýrem. Aplikace ze zásady neobsahuje žádné komerční reklamy obchodních řetězců, žádné sponzorované pozice ani sledovací trackery. Pokud vám aplikace pomáhá šetřit rodinný rozpočet a čas při nákupech v Česku, můžete podpořit vývoj a testování na reálném hardwaru v [Sekci podpory (Donation Zone)](#-podpora-nezávislého-vývojáře-donation-zone).
 
 ---
 
-## 📑 Содержание
+## 📑 Obsah
 
-1. [Иконка Material 3 и стек библиотек](#-иконка-material-3-и-стек-библиотек)
-2. [Для кого и зачем создан Regál](#-для-кого-и-зачем-создан-regál)
-3. [Кросс-платформенная архитектура и устройства](#-кросс-платформенная-архитектура-и-устройства)
-4. [Поддержка складных устройств (Foldable & Tabletop Mode)](#-поддержка-складных-устройств-foldable--tabletop-mode)
-5. [Функциональные возможности](#-функциональные-возможности)
-6. [Языки интерфейса (6 локализаций)](#-языки-интерфейса-6-локализаций)
-7. [Офлайн-архитектура (100% Offline-First)](#-офлайн-архитектура-100-offline-first)
-8. [Инструкция по установке и сборке](#-инструкция-по-установке-и-сборке)
-9. [Автоматизированное тестирование (11 тест-сьютов)](#-автоматизированное-тестирование-11-тест-сьютов)
-10. [💖 Поддержка автора и развития проекта (Donation Zone)](#-поддержка-автора-и-развития-проекта-donation-zone)
-11. [Лицензия](#-лицензия)
-
----
-
-## 🎨 Иконка Material 3 и стек библиотек
-
-### Векторная концепция иконки (Android 13–17 Adaptive & Monochrome)
-Иконка приложения **Regál** разработана по спецификациям **Material Design 3** и требованиям Google Play / Android Adaptive Icons:
-- **Геометрия**: минималистичный розничный ценник (*visací cenovka*), наклоненный под динамичным углом **-14°**, со скругленными гранями, сквозным отверстием люверса, символом скидки **`%`** и четкой гравировкой **`CENA`**.
-- **Двухслойный адаптивный контейнер (`ic_launcher.xml`)**:
-  - Флагманский фон: глубокий графитовый оттенок `#0F172A`.
-  - Передний план: фирменный изумрудный `#10B981` с контрастными белыми элементами.
-- **Monochrome-слой (`ic_launcher_monochrome.xml`)**: специальный векторный силуэт для **Material You Dynamic Theming (Android 13, 14, 15, 16 и 17)**. Система Android автоматически перекрашивает иконку в единый тон с обоями рабочего стола пользователя.
-
-### Использованный технологический стек
-Интерфейс спроектирован с упором на максимальную скорость отклика (120 FPS) и минимальный вес сборки (**~89 KB gzip**):
-- **Иконки интерфейса**:
-  - `unplugin-icons` + `@iconify-json/lucide` — векторный набор Lucide Icons, импортируемый как скомпилированные Vue-компоненты (tree-shaking нулевого оверхеда).
-- **Frontend Core**:
-  - **Vue 3.5** (Composition API, `<script setup>`, легковесная реактивность).
-  - **TypeScript 5.7** (полная строгая типизация каталога, корзины и нутриентов).
-  - **Vite 6** (мгновенный HMR и Rollup-компилятор).
-- **Стили и раскладка**:
-  - **Tailwind CSS v4** с поддержкой Container Queries и W3C Viewport Segments API.
-- **Хранилище данных и PWA**:
-  - **Dexie.js 4.0** (IndexedDB) — локальная реляционная база данных в браузере.
-  - **vite-plugin-pwa** + **Workbox 7** — сервис-воркер с предкэшированием 14 критических файлов и runtime-кэшированием картинок.
-- **Кросс-платформенные движки**:
-  - **Tauri v2** (Rust) — для легковесных сборок Windows/macOS/Linux без Chromium.
-  - **Capacitor 7** — нативный мост для Android APK (`cz.regal.app`).
+1. [Vektorová ikona Material 3 a technologický stack](#-vektorová-ikona-material-3-a-technologický-stack)
+2. [Pro koho a proč vznikl Regál](#-pro-koho-a-proč-vznikl-regál)
+3. [Multiplatformní architektura a zařízení](#-multiplatformní-architektura-a-zařízení)
+4. [Podpora skládacích zařízení (Foldable & Tabletop Mode)](#-podpora-skládacích-zařízení-foldable--tabletop-mode)
+5. [Klíčové funkce a moduly](#-klíčové-funkce-a-moduly)
+6. [Jazyková lokalizace (6 jazyků)](#-jazyková-lokalizace-6-jazyků)
+7. [Offline-First architektura (100% bez připojení k síti)](#-offline-first-architektura-100-bez-připojení-k-síti)
+8. [Instalace a spuštění](#-instalace-a-spuštění)
+9. [Automatizované testování (11 testovacích sad)](#-automatizované-testování-11-testovacích-sad)
+10. [💖 Podpora nezávislého vývojáře (Donation Zone)](#-podpora-nezávislého-vývojáře-donation-zone)
+11. [Licence](#-licence)
 
 ---
 
-## 🎯 Для кого и зачем создан Regál
+## 🎨 Vektorová ikona Material 3 a technologický stack
 
-*Regál* (по-чешски — магазинный стеллаж, полка) создан, чтобы навести порядок в хаосе скидок и цен чешских супермаркетов:
-1. **Прозрачные цены без уловок**: из-за разного объема упаковок (1.5 л vs 2.0 л, 900 г vs 1000 г) покупателям сложно оценить выгоду. Regál автоматически рассчитывает честную цену за 1 литр (`Kč / 1 l`) и за 1 килограмм (`Kč / 1 kg`).
-2. **Учет клубных карт**: отображение как регулярной цены, так и специальных предложений (*Clubcard, BILLA Bonus, Můj Albert, Lidl Plus*).
-3. **Оптимизация корзины с учетом дороги**: сервис вычисляет, стоит ли разделять покупку на 2 магазина, закладывая затраты на бензин или билет MHD (*Friction Cost*).
-4. **Контроль питания (КБЖУ)**: расчет энергии и поиск самых экономичных источников белка на потраченную крону.
+### Vektorová koncepce ikony (Android 13–17 Adaptive & Monochrome)
+Ikona aplikace **Regál** je navržena podle specifikací **Material Design 3** a oficiálních standardů Google Play / Android Adaptive Icons:
+- **Geometrie**: minimalistická visací cenovka nakloněná pod dynamickým úhlem **-14°**, se zaoblenými hranami, průchozím otvorem pro zavěšení, symbolem slevy **`%`** a čistým nápisem **`CENA`**.
+- **Dvouvrstvý adaptivní kontejner (`ic_launcher.xml`)**:
+  - Pozadí: hluboký břidlicový tón `#0F172A`.
+  - Popředí: smaragdově mátový tón `#10B981` s kontrastními bílými prvky.
+- **Monochromní vrstva (`ic_launcher_monochrome.xml`)**: vektorová silueta optimalizovaná pro **Material You Dynamic Theming (Android 13, 14, 15, 16 a 17)**. Systém Android automaticky přebarví ikonu podle barevné palety aktuální tapety uživatele (Monet engine).
+
+### Použitý technologický stack
+Uživatelské rozhraní je postaveno s důrazem na maximální odezvu (120 FPS) a minimální velikost výsledného balíčku (**~89 KB gzip**):
+- **Ikony v rozhraní**:
+  - `unplugin-icons` + `@iconify-json/lucide` — vektorová sada Lucide Icons kompilovaná přímo do Vue komponent (tree-shaking s nulovou režií za běhu).
+- **Jádro aplikace**:
+  - **Vue 3.5** (Composition API, `<script setup>`, efektivní reaktivita).
+  - **TypeScript 5.7** (přísná typová kontrola katalogu, košíku, cen a nutričních hodnot).
+  - **Vite 6** (bleskový HMR a optimalizovaný Rollup bundler).
+- **Styly a rozvržení**:
+  - **Tailwind CSS v4** s podporou Container Queries a W3C Viewport Segments API.
+- **Lokální úložiště a PWA**:
+  - **Dexie.js 4.0** (IndexedDB) — lokální databáze v prohlížeči pro plný offline provoz.
+  - **vite-plugin-pwa** + **Workbox 7** — Service Worker s přednačtením 14 klíčových souborů a runtime mezipamětí pro obrázky (`StaleWhileRevalidate`).
+- **Multiplatformní frameworky**:
+  - **Tauri v2** (Rust) — pro lehkou desktopovou aplikaci pro Windows, macOS a Linux bez náročného Chromia.
+  - **Capacitor 7** — nativní most pro sestavení Android APK (`cz.regal.app`).
 
 ---
 
-## 📱 Кросс-платформенная архитектура и устройства
+## 🎯 Pro koho a proč vznikl Regál
 
-| Платформа | Технология | Особенности работы |
+V českém maloobchodním prostředí naráží nakupující na několik zásadních problémů:
+1. **Nepřehledné akce a klubové ceny**: slevy jsou roztříštěné do desítek aplikací (Clubcard, Můj Albert, Lidl Plus, Kaufland Card, BILLA Bonus).
+2. **Skryté zmenšování balení (shrinkflace)**: opticky levnější zboží má často menší gramáž či objem (1.5 l vs 2.0 l, 900 g vs 1000 g). Regál automaticky počítá férovou měrnou cenu za 1 litr (`Kč / 1 l`) a 1 kilogram (`Kč / 1 kg`).
+3. **Falešná úspora při přejíždění**: ušetřit 15 Kč v sousedním supermarketu postrádá smysl, pokud cesta autem či MHD stojí 20–40 Kč. Regál kalkuluje náklady na dopravu (*Friction Cost*) a doporučí rozdělení nákupu pouze tehdy, když se skutečně vyplatí.
+4. **Sledování výživy (KBJU)**: propojení rozpočtu s nutričními hodnotami a vyhodnocení nejvýhodnějších zdrojů bílkovin.
+
+---
+
+## 📱 Multiplatformní architektura a zařízení
+
+| Platforma | Technologie | Klíčové vlastnosti |
 | :--- | :--- | :--- |
-| **Веб / PWA** | Браузер / PWA Standalone | Установка в 1 клик с экрана браузера, мгновенная загрузка через Service Worker, работа офлайн. |
-| **Смартфоны (Android / iOS)** | Capacitor / PWA | Оптимизировано под управление одной рукой, нижняя навигация, тактильные кнопки. |
-| **Складные телефоны (Foldables)** | W3C Device Posture API | Двухэкранный режим при раскрытии (книжка), Tabletop-режим при сгибе на 90° (Galaxy Z Fold, Pixel Fold). |
-| **Планшеты (iPad / Android)** | CSS Grid & Master-Detail | Разделение экрана: слева каталог с фильтрами, справа корзина с оптимизатором. |
-| **Десктоп (Windows, macOS, Linux)** | Tauri v2 (Rust) | Настольное приложение с минимальным потреблением RAM (< 40 MB), системным треем и горячими клавишами. |
+| **Web / PWA** | Webový prohlížeč / PWA Standalone | Instalace na 1 kliknutí, okamžité načtení přes Service Worker, kompletní offline provoz. |
+| **Chytré telefony (Android / iOS)** | Capacitor / PWA | Přizpůsobeno pro ovládání jednou rukou, spodní navigační panel, rychlá tlačítka. |
+| **Skládací telefony (Foldables)** | W3C Device Posture API | Dvoupanelový režim knihy, Tabletop režim při ohybu na 90° (Samsung Galaxy Z Fold, Google Pixel Fold). |
+| **Tablety (iPad / Android)** | CSS Grid & Master-Detail | Rozdělená obrazovka: vlevo katalog s filtry, vpravo košík s optimalizátorem. |
+| **Desktop (Windows, macOS, Linux)** | Tauri v2 (Rust) | Samostatná aplikace s minimální spotřebou paměti RAM (< 40 MB), integrací do lišty a klávesovými zkratkami. |
 
 ---
 
-## 📐 Поддержка складных устройств (Foldable & Tabletop Mode)
+## 📐 Podpora skládacích zařízení (Foldable & Tabletop Mode)
 
-В приложении встроен компонент `FoldableTwoPane.vue`, который отслеживает аппаратное положение устройства:
-- **Book Posture (Книжка)**: левая панель отводится под поиск и фильтры, правая — под корзину и оптимизацию сплит-поездок. Зона шарнира (hinge crease) защищена от наложения кнопок.
-- **Tabletop Posture (Сгиб под 90°)**: устройство ставится на стол. Верхний экран отображает аналитику КБЖУ и расчет сплита, нижний — список товаров и кнопки изменения количества.
-- **Интерактивный симулятор**: В шапке приложения доступен переключатель `Auto / Fold / Tabletop` для проверки адаптивности на любых мониторах.
-
----
-
-## ⚡ Функциональные возможности
-
-### 1. Каталог и поиск по 13 сетям Чехии
-- Поддерживаемые сети: **Tesco, BILLA, Albert, Lidl, Kaufland, Rohlík.cz, Košík.cz, Globus, Tamda Foods, Ratio s.r.o., COOP, JIP Potraviny, ESO MARKET**.
-- Поиск по названию, бренду, категории и штрихкоду EAN-13.
-- Данные о реальных производителях и боттлерах (например, завод *Coca-Cola HBC Česko a Slovensko, Praha 9 - Kyje*).
-
-### 2. Честная цена за единицу (Kč / 1 l, Kč / 1 kg)
-- Автоматический пересчет стоимости за литр и килограмм.
-- Цветовая индикация промо-акций и скидок по картам лояльности.
-
-### 3. Комбинаторный оптимизатор корзины с учетом трения
-- Алгоритм выполняется в фоновом потоке **Web Worker**.
-- Находит самый выгодный единый супермаркет.
-- Просчитывает комбинации сплита на 2 магазина.
-- **Friction Cost**: выбор затрат на поездку (0 Kč пешком, 15 Kč MHD, 20 Kč/40 Kč авто). Сплит предлагается **только если чистая выгода превышает стоимость дороги**.
-
-### 4. Нутрициологический калькулятор (КБЖУ) и рейтинг белка
-- Автоматический расчет суммарных калорий, белков, жиров, углеводов и клетчатки на весь набранный чек.
-- Сегментированный бар распределения калорий.
-- Пресеты питания: *Vyvážená strava* (2000 kcal), *Fitness & Svaly* (2500 kcal), *Low-Carb / Keto* (1800 kcal).
-- **Лидерборд «Cena za bílkoviny»**: ранжирует продукты корзины по минимальной стоимости 1 г белка (`Kč / g protein`).
-
-### 5. Избранное и Сравнение
-- Локальное сохранение позиций в IndexedDB с отслеживанием динамики цен.
-- Сопоставление до 4 товаров бок-о-бок.
-
-### 6. Актуальные буклеты (Akční letáky)
-- Раздел каталога цифровых буклетов всех торговых сетей с обратным отсчетом дней действия скидок.
+Komponenta `FoldableTwoPane.vue` reaguje na fyzické ohnutí zařízení:
+- **Book Posture (Režim knihy)**: levý panel slouží pro vyhledávání a filtrování, pravý pro košík a kalkulaci úspory. Oblast fyzického pantu (hinge crease) je chráněna před překrytím tlačítky.
+- **Tabletop Posture (Ohyb pod úhlem 90°)**: položené zařízení na stole. Horní polovina zobrazuje nutriční přehled a rozdělení nákupu, dolní polovina slouží jako ovládací panel pro úpravu počtu položek.
+- **Interaktivní simulátor**: v horní liště aplikace je přepínač `Auto / Fold / Tabletop` pro otestování rozvržení na jakémkoli monitoru.
 
 ---
 
-## 🌍 Языки интерфейса (6 локализаций)
+## ⚡ Klíčové funkce a moduly
 
-Regál полностью локализован на 6 европейских языков с мгновенным переключением без перезагрузки:
-- 🇨🇿 **Čeština** (основной язык)
+### 1. Katalog a vyhledávání ve 13 obchodních řetězcích
+- Podporované řetězce: **Tesco, BILLA, Albert, Lidl, Kaufland, Rohlík.cz, Košík.cz, Globus, Tamda Foods, Ratio s.r.o., COOP, JIP Potraviny, ESO MARKET**.
+- Vyhledávání podle názvu, značky, kategorie i čárového kódu EAN-13.
+- Informace o výrobci a stáčírně (např. *Coca-Cola HBC Česko a Slovensko, s.r.o., Praha 9 - Kyje*).
+
+### 2. Férová měrná cena (Kč / 1 l, Kč / 1 kg)
+- Automatický přepočet ceny na standardní měrnou jednotku.
+- Jasné odlišení běžné ceny a klubové ceny věrnostních programů.
+
+### 3. Kombinatorický optimalizátor košíku
+- Výpočet probíhá na pozadí ve **Web Workeru** bez zasekávání rozhraní.
+- Vyhodnotí nejlevnější nákup v rámci jedné prodejny (při 100% dostupnosti položek).
+- Spočítá optimální kombinaci rozdělení nákupu mezi 2 obchody.
+- **Friction Cost**: možnost nastavit náklady na přejezd (0 Kč pěšky, 15 Kč MHD, 20 Kč / 40 Kč auto). Rozdělení nákupu je doporučeno **pouze tehdy, pokud je čistá úspora vyšší než cena dopravy**.
+
+### 4. Nutriční kalkulačka (KBJU) a efektivita bílkovin
+- Součet celkové energie (kcal i kJ), bílkovin, tuků, sacharidů a vlákniny pro celý košík.
+- Přehledný pruhový graf poměru energie z makroživin.
+- Předvolby denních cílů: *Vyvážená strava* (2000 kcal), *Fitness & Svaly* (2500 kcal), *Low-Carb / Keto* (1800 kcal).
+- **Žebříček «Cena za bílkoviny»**: seřadí položky košíku podle nejnižší ceny za 1 g čisté bílkoviny (`Kč / g protein`).
+
+### 5. Oblíbené a Srovnání
+- Ukládání oblíbených položek do lokální IndexedDB paměti.
+- Detailní srovnání až 4 produktů vedle sebe.
+
+### 6. Aktuální akční letáky
+- Přehled oficiálních digitálních letáků obchodních řetězců s odpočtem dnů platnosti.
+
+---
+
+## 🌍 Jazyková lokalizace (6 jazyků)
+
+Regál nabízí plnohodnotný překlad do 6 evropských jazyků s okamžitým přepínáním bez nutnosti načítat stránku znovu:
+- 🇨🇿 **Čeština** (výchozí jazyk)
 - 🇸🇰 **Slovenčina**
 - 🇵🇱 **Polski**
 - 🇩🇪 **Deutsch**
@@ -145,88 +145,88 @@ Regál полностью локализован на 6 европейских �
 
 ---
 
-## 📴 Офлайн-архитектура (100% Offline-First)
+## 📴 Offline-First architektura (100% bez připojení k síti)
 
-- Все данные каталога, история цен, избранное и корзина хранятся локально в **IndexedDB**.
-- **Workbox Service Worker** предкэширует 14 критических файлов ядра приложения.
-- Изображения товаров кэшируются при первом просмотре по стратегии `StaleWhileRevalidate` на 30 дней.
-- Полная автономность: поиск, расчеты цен и корзина работают в авиарежиме и без интернета.
+- Veškerá data katalogu, historie cen, oblíbené i nákupní košík jsou uložena lokálně v **IndexedDB**.
+- **Workbox Service Worker** udržuje mezipaměť 14 kritických souborů jádra aplikace.
+- Obrázky produktů se ukládají při prvním zobrazení na 30 dní (`StaleWhileRevalidate`).
+- Aplikace plnohodnotně funguje i v režimu Letadlo nebo v podzemí bez mobilního signálu.
 
 ---
 
-## 🛠 Инструкция по установке и сборке
+## 🛠 Instalace a spuštění
 
-### Требования
-- **Node.js**: версии 20.x или выше
-- **npm**: 10.x или выше
-- *(Опционально для десктопа)*: Rust и Cargo для сборки Tauri v2
-- *(Опционально для Android)*: Android Studio & JDK 17 для Capacitor
+### Požadavky
+- **Node.js**: verze 20.x nebo novější
+- **npm**: 10.x nebo novější
+- *(Volitelně pro desktop)*: Rust & Cargo pro sestavení Tauri v2
+- *(Volitelně pro Android)*: Android Studio & JDK 17 pro Capacitor
 
-### 1. Клонирование и установка зависимостей
+### 1. Klonování a instalace balíčků
 ```bash
 git clone https://github.com/RandoTeam/Regal.git
 cd Regal
 npm install
 ```
 
-### 2. Запуск в режиме разработки
+### 2. Spuštění vývojového serveru
 ```bash
 npm run dev
 ```
-Откройте браузер по адресу `http://localhost:5173`.
+Otevřete prohlížeč na adrese `http://localhost:5173`.
 
-### 3. Сборка продакшен-версии (Web / PWA)
+### 3. Produkční sestavení (Web / PWA)
 ```bash
 npm run build
 ```
-Готовый дистрибутив генерируется в каталоге `dist/`.
+Výsledné optimalizované soubory budou vygenerovány v adresáři `dist/`.
 
-### 4. Сборка для Android (Capacitor)
+### 4. Sestavení pro Android (Capacitor)
 ```bash
 npx cap sync android
 npx cap open android
 ```
 
-### 5. Сборка для Desktop (Tauri v2)
+### 5. Sestavení pro Desktop (Tauri v2)
 ```bash
 npm run tauri build
 ```
 
 ---
 
-## 🧪 Автоматизированное тестирование (11 тест-сьютов)
+## 🧪 Automatizované testování (11 testovacích sad)
 
-Полный набор юнит-, интеграционных и сквозных E2E-тестов запускается одной командой:
+Kompletní sadu testů lze spustit jediným příkazem:
 
 ```bash
 npm test
 ```
 
-### Состав тестовых наборов:
-1. `tests/db_test.ts` — операции схемы IndexedDB (CRUD, выборки, цены).
-2. `tests/dataset_test.ts` — целостность датасета, 13 сетей, EAN-13 и производители.
-3. `tests/favorites_test.ts` — сохранение и удаление позиций в избранном.
-4. `tests/compare_test.ts` — матрица сравнения и подсчет удельной выгоды.
-5. `tests/leaflets_test.ts` — каталог актуальных промо-буклетов.
-6. `tests/optimizer_test.ts` — комбинаторный алгоритм оптимизации корзины и friction cost.
-7. `tests/nutrition_test.ts` — расчет КБЖУ, макросов и стоимости 1 г белка.
-8. `tests/basket_test.ts` — жизненный цикл корзины, инкременты и очистка.
-9. `tests/pwa_offline_test.ts` — PWA-ассеты и автономная работа IndexedDB без сети.
-10. `tests/cross_platform_config_test.ts` — валидация конфигураций Capacitor и Tauri v2.
-11. `tests/e2e_full_verification_test.ts` — общий сквозной E2E тест всех систем приложения.
+### Seznam testů:
+1. `tests/db_test.ts` — operace IndexedDB schématu (CRUD, indexy, ceny).
+2. `tests/dataset_test.ts` — integrita databáze, 13 řetězců, EAN-13 a výrobci.
+3. `tests/favorites_test.ts` — ukládání a mazání oblíbených položek.
+4. `tests/compare_test.ts` — matice srovnání a výpočet měrných cen.
+5. `tests/leaflets_test.ts` — katalog akčních letáků a expirace.
+6. `tests/optimizer_test.ts` — kombinatorický algoritmus optimalizace a friction cost.
+7. `tests/nutrition_test.ts` — výpočet KBJU, makroživin a ceny za 1 g bílkoviny.
+8. `tests/basket_test.ts` — stav nákupního košíku, úprava množství a vymazání.
+9. `tests/pwa_offline_test.ts` — PWA manifest, ikony a offline funkčnost bez internetu.
+10. `tests/cross_platform_config_test.ts` — validace konfigurací Capacitor a Tauri v2.
+11. `tests/e2e_full_verification_test.ts` — komplexní end-to-end verifikace celého systému.
 
 ---
 
-## 💖 Поддержка автора и развития проекта (Donation Zone)
+## 💖 Podpora nezávislého vývojáře (Donation Zone)
 
-Regál создается и развивается независимым разработчиком-одиночкой без венчурных инвестиций и без участия торговых сетей. Разработка офлайн-алгоритмов, тестирование складных форм-факторов и поддержка актуальности чешских каталогов требуют реального парка устройств, времени и вычислительных ресурсов.
+Projekt **Regál** vzniká a je udržován nezávislým vývojářem bez externího kapitálu a bez účasti supermarketů. Vývoj algoritmů, testování na skládacích zařízeních a udržování aktuálních databázi vyžaduje hardware, čas a energii.
 
-Если этот проект полезен вам, вашей семье или вашему бизнесу, любая добровольная поддержка помогает развивать приложение и сохранять его полностью независимым:
+Pokud vám projekt přináší užitek, jakákoli dobrovolná podpora pomáhá udržet projekt nezávislý a svobodný:
 
-### 🪙 Прямая криптовалютная поддержка (Worldwide Cryptocurrency)
-*Децентрализованно, без посредников, доступно по всему миру.*
+### 🪙 Přímá podpora v kryptoměnách (Worldwide Cryptocurrency Support)
+*Decentralizovaně, bez prostředníků, celosvětově dostupné.*
 
-| Криптовалюта | Сеть | Адрес кошелька |
+| Kryptoměna | Síť | Adresa peněženky |
 | :--- | :--- | :--- |
 | **USDT** | TRC-20 | `TY1j2N8x4K7b9vL3mP5qR8sW2tU4xZ6y8A` |
 | **TON** | TON Network | `EQB_parlex_support_developer_channel` |
@@ -235,10 +235,10 @@ Regál создается и развивается независимым ра�
 
 ---
 
-## 📄 Лицензия
+## 📄 Licence
 
-Распространяется под свободной лицензией **MIT License**. Подробности в файле [LICENSE](LICENSE).
+Distribuováno pod svobodnou licencí **MIT License**. Více informací v souboru [LICENSE](LICENSE).
 
 <p align="center">
-  Сделано с заботой о семейном бюджете и здоровье покупателей в Чешской Республике 🇨🇿
+  Vytvořeno s ohledem na rodinný rozpočet a zdraví nakupujících v České republice 🇨🇿
 </p>

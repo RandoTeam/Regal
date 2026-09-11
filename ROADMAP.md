@@ -1,118 +1,112 @@
-# ROADMAP & PIPELINE: KupiRadar (Czech Retail & Basket Optimizer)
+# ROADMAP & PIPELINE: Regál (Czech Retail & Basket Optimizer)
 
-Единый реестр фаз, подфаз и шагов реализации кросс-платформенного приложения для поиска продуктов, сравнения цен, оптимизации корзины и учета КБЖУ по всей Чехии (Web, Desktop, Mobile, Foldable).
-
----
-
-## Статус выполнения проекта
-
-- [x] **Фаза 1: Архитектурный фундамент, дизайн-система и адаптивный каркас**
-  - [x] **Подфаза 1.1:** Инициализация проекта, сборка и базовый инструментарий (Vite + Vue 3.5 + TS + Tailwind CSS + Lucide Icons + PWA plugin).
-  - [x] **Подфаза 1.2:** Движок мультиязычности i18n (CS, SK, PL, DE, EN, SL) с динамическим переключением без перезагрузки.
-  - [x] **Подфаза 1.3:** Адаптивный каркас для раскладных устройств (FoldableTwoPane, CSS Viewport Segments API, Tabletop mode, планшеты, десктоп).
-
-- [x] **Фаза 2: Модели данных, локальное хранилище и каталог поиска**
-  - [x] **Подфаза 2.1:** Схема IndexedDB (Dexie.js) и TypeScript-интерфейсы (товары, цены, магазины, регионы/PSČ, КБЖУ).
-  - [x] **Подфаза 2.2:** Каталог сетей и репрезентативный датасет продуктов Чехии (Tesco, Billa, Albert, Lidl, Kaufland, Rohlík, Košík, Globus, Tamda, Ratio, Coop) с фото, штрихкодами и данными о боттлерах/производителях.
-  - [x] **Подфаза 2.3:** Эргономичный интерфейс каталога, поиск, фасетные фильтры (магазины, регионы, акции) и карточки товаров.
-
-- [x] **Фаза 3: Избранное, сравнение товаров и раздел скидок (Letáky)**
-  - [x] **Подфаза 3.1:** Модуль «Избранное» с локальным сохранением и отслеживанием динамики цен.
-  - [x] **Подфаза 3.2:** Модуль «Сравнение товаров» (side-by-side сопоставление цен за 1 л/кг, объема и состава).
-  - [x] **Подфаза 3.3:** Раздел «Акции и буклеты» (Letáky) с промо-календарем и фильтрацией по актуальным скидкам недели.
-
-- [x] **Фаза 4: Умный калькулятор корзины и нутрициология (КБЖУ)**
-  - [x] **Подфаза 4.1:** Фоновый Web Worker для оптимизации корзины (поиск минимальной стоимости: 1 магазин vs split в 2 магазина с учетом friction cost).
-  - [x] **Подфаза 4.2:** Нутрициологический калькулятор (подсчет КБЖУ, макронутриенты, расчет стоимости за грамм белка).
-  - [x] **Подфаза 4.3:** Интерактивный UI корзины с адаптацией под режим Tabletop на раскладушках.
-
-- [x] **Фаза 5: Офлайн-режим, PWA и кросс-платформенная сборка**
-  - [x] **Подфаза 5.1:** Настройка Service Worker, оффлайн-кэширование ассетов и картинок, PWA манифест.
-  - [x] **Подфаза 5.2:** Конфигурация для сборки Capacitor (Android APK) и Tauri v2 (Desktop Windows/macOS/Linux).
-  - [x] **Подфаза 5.3:** Комплексное сквозное тестирование всех форм-факторов и финальная верификация.
+Centrální registr fází, podfází a kroků realizace multiplatformní aplikace pro vyhledávání produktů, srovnání cen, optimalizaci nákupního košíku a sledování KBJU v České republice (Web, Desktop, Mobile, Foldable).
 
 ---
 
-## Журнал изменений (Changelog)
+## Stav dokončení projektu
 
-### [2026-09-11] Фаза 5. Подфаза 5.3 завершена (ПРОЕКТ 100% ЗАВЕРШЕН)
-* Реализован комплексный сквозной E2E верификационный тест `tests/e2e_full_verification_test.ts`, тестирующий 9 ключевых систем проекта в едином потоке (база данных, 6 языков i18n, 13 торговых сетей, каталог и цены за 1 л/кг, избранное, корзина и Web Worker оптимизатор, КБЖУ нутрициология, актуальные буклеты letáky, кросс-платформенные конфигурации).
-* Все 11 наборов автоматизированных тестов пройдены со 100% успехом (`npm test`).
-* Успешно выполнена компиляция TypeScript и финальная сборка Vite PWA (`npm run build`).
-* Все 5 фаз и 14 подфаз технического задания реализованы в полном объеме и верифицированы.
+- [x] **Fáze 1: Architektonický základ, design systém a adaptivní rozvržení**
+  - [x] **Podfáze 1.1:** Inicializace projektu, sestavení a základní nástroje (Vite + Vue 3.5 + TS + Tailwind CSS + Lucide Icons + PWA plugin).
+  - [x] **Podfáze 1.2:** Lokalizační jádro i18n (CS, SK, PL, DE, EN, SL) s dynamickým přepínáním za běhu bez nutnosti znovunačtení stránky.
+  - [x] **Podfáze 1.3:** Adaptivní rozvržení pro skládací zařízení (FoldableTwoPane, CSS Viewport Segments API, Tabletop režim, tablety, desktop).
 
-### [2026-09-11] Фаза 5. Подфаза 5.2 завершена
-* Подготовлена конфигурация Capacitor `capacitor.config.ts` (идентификатор приложения `cz.kupiradar.app`, безопасная схема `https`, splash screen `#0f172a`).
-* Сформирован `android/app/src/main/AndroidManifest.xml` с аппаратной поддержкой складных устройств (`android:resizeableActivity="true"`, обработка перегибов и смены ориентации экрана без перезагрузки `smallestScreenSize|screenLayout|orientation`), разрешениями сети и deep-link схемами.
-* Разработана конфигурация десктопной сборки Tauri v2:
-  - `src-tauri/tauri.conf.json`: кросс-платформенные настройки окон (Windows/macOS/Linux), строгие CSP для безопасного локального оффлайн-рендеринга.
-  - `src-tauri/Cargo.toml`: манифест Rust зависимостей Tauri 2.0.
-  - `src-tauri/src/main.rs`: точка входа десктопного приложения с подавлением консольного окна в release.
-* Написан технический тест `tests/cross_platform_config_test.ts`. Все 10 тестовых наборов пройдены (`npm test`), сборка подтверждена (`npm run build`).
+- [x] **Fáze 2: Datové modely, lokální úložiště a katalog vyhledávání**
+  - [x] **Podfáze 2.1:** IndexedDB schéma (Dexie.js) a TypeScript rozhraní (produkty, ceny, prodejny, regiony/PSČ, KBJU).
+  - [x] **Podfáze 2.2:** Katalog obchodních řetězců a reprezentativní dataset českých produktů (Tesco, Billa, Albert, Lidl, Kaufland, Rohlík, Košík, Globus, Tamda, Ratio, Coop) s fotografiemi, čárovými kódy a údaji o stáčírnách/výrobcích.
+  - [x] **Podfáze 2.3:** Ergonomické uživatelské rozhraní katalogu, vyhledávání, fazetové filtry (řetězce, regiony, akce) a produktové karty.
 
-### [2026-09-11] Фаза 5. Подфаза 5.1 завершена
-* Сконфигурирован полнофункциональный Service Worker через Workbox (`vite-plugin-pwa`):
-  - Precache-кэширование 14 критических ассетов (HTML, JS, CSS, WebManifest, Web Worker).
-  - Runtime-кэширование внешних картинок (Unsplash, CDN) со стратегией `StaleWhileRevalidate`, лимитом на 100 записей и сроком хранения 30 дней.
-  - Runtime-кэширование веб-шрифтов со стратегией `CacheFirst` (1 год).
-  - Настройка `navigateFallback: '/index.html'` для 100% автономной работы SPA без доступа к сети.
-* Сгенерированы валидные PWA иконки (`pwa-192x192.png`, `pwa-512x512.png`, `apple-touch-icon.png`) в директории `public/`.
-* Расширен WebManifest: чешская локализация (`lang: 'cs'`), категории (`shopping`, `finance`, `lifestyle`), быстрые шорткаты (`Katalog`, `Košík`, `Letáky`).
-* Разработан composable `useOnlineStatus.ts` и добавлен индикатор offline-режима в шапку приложения.
-* Написан интеграционный тест `tests/pwa_offline_test.ts`. Все 9 тестовых наборов пройдены (`npm test`), сборка подтверждена (`npm run build`).
+- [x] **Fáze 3: Oblíbené položky, srovnání produktů a akční letáky**
+  - [x] **Podfáze 3.1:** Modul «Oblíbené» s lokálním ukládáním a sledováním cenového vývoje.
+  - [x] **Podfáze 3.2:** Modul «Srovnání produktů» (side-by-side porovnání měrných cen za 1 l/kg, objemu a složení).
+  - [x] **Podfáze 3.3:** Sekce «Akční letáky» s kalendářem platnosti a filtrací aktuálních slev týdne.
 
-### [2026-09-11] Фаза 4. Подфаза 4.3 завершена (ФАЗА 4 ПОЛНОСТЬЮ ЗАВЕРШЕНА)
-* Разработан эргономичный интерактивный компонент корзины `BasketView.vue` с поддержкой адаптивного двухпанельного интерфейса для десктопа и раскладушек в режиме Tabletop (сгиб 90°).
-* Реализованы инкремент/декремент количества, быстрое удаление, очистка корзины с подтверждением и переход в каталог.
-* Интегрирован вызов фонового Web Worker комбинаторного оптимизатора цен:
-  - Расчет оптимального единого магазина (минимальная цена при полной доступности товаров).
-  - Расчет сплита на 2 магазина с выбором издержек на дорогу (0 Kč пешком, 15 Kč MHD, 20 Kč/40 Kč авто).
-  - Наглядное отображение распределения товаров по магазинам и чистой выгоды с учетом логистики.
-* Встроен компонент расчета КБЖУ `NutritionCard.vue`, отображающий живые суммарные калории, белки, жиры, углеводы, клетчатку и рейтинг выгодности белка.
-* Проведена полная интеграция всех видов приложения в единую маршрутизацию в `App.vue` (Каталог, Избранное, Сравнение, Корзина, Буклеты/Letáky).
-* Разработан и успешно выполнен сквозной тест `tests/basket_test.ts`. Все 8 тестовых наборов пройдены (`npm test`), сборка подтверждена (`npm run build`).
+- [x] **Fáze 4: Inteligentní optimalizátor košíku a nutriční profil (KBJU)**
+  - [x] **Podfáze 4.1:** Web Worker na pozadí pro optimalizaci košíku (hledání minimální ceny: 1 obchod vs. rozdělení do 2 obchodů s modelem dopravních nákladů).
+  - [x] **Podfáze 4.2:** Nutriční kalkulačka (součet KBJU, makroživiny, výpočet ceny za 1 gram bílkoviny).
+  - [x] **Podfáze 4.3:** Interaktivní rozhraní košíku s adaptací pro Tabletop režim na skládacích telefonech.
 
-### [2026-09-11] Фаза 4. Подфаза 4.2 завершена
-* Разработан нутрициологический вычислительный модуль `src/utils/nutrition.ts` с точным пересчетом базовых значений на 100 г / 100 мл в полный объем упаковки (литры / граммы) и количество штук в корзине.
-* Реализован подсчет калорий (kcal), энергии в килоджоулях (kJ), белков, углеводов, жиров и пищевых волокон (клетчатки).
-* Реализован расчет процентного соотношения макронутриентов (калорийность из Б/Ж/У: 4/4/9 ккал на грамм).
-* Разработан алгоритм вычисления стоимости 1 г чистой белковой массы (`calcPricePerProtein`) и формирования лидерборда наиболее экономически выгодных источников белка в корзине (`getProteinCostLeaderboard`).
-* Добавлены пресеты суточных целей питания (Vyvážená strava 2000 kcal, Fitness & Svaly 2500 kcal, Low-Carb / Keto 1800 kcal).
-* Создан адаптивный компонент `NutritionCard.vue` с цветовыми индикаторами прогресса, сегментированным баром макронутриентов и медалями за самое дешевое соотношение Kč/г белка.
-* Написан технический тест `tests/nutrition_test.ts`. Все 7 тестов проекта пройдены успешно (`npm test`), сборка подтверждена (`npm run build`).
+- [x] **Fáze 5: Offline režim, PWA a multiplatformní sestavení**
+  - [x] **Podfáze 5.1:** Nastavení Service Workeru, offline ukládání do mezipaměti, PWA manifest a ikony.
+  - [x] **Podfáze 5.2:** Konfigurace pro sestavení Capacitor (Android APK) a Tauri v2 (Desktop Windows/macOS/Linux).
+  - [x] **Podfáze 5.3:** Komplexní end-to-end verifikace všech zařízení a finální schválení.
 
-### [2026-09-11] Фаза 4. Подфаза 4.1 завершена
-* Разработан многопоточный фоновый Web Worker `optimizer.worker.ts` с чистым комбинаторным алгоритмом оптимизации корзины покупок.
-* Реализовано ранжирование вариантов покупки в одном магазине (по наличию всех позиций и минимальной сумме).
-* Реализован умный поиск сплита по 2 магазинам с учетом стоимости перемещения / логистики (`frictionCostPerExtraStore`, по умолчанию 20 Kč): сплит рекомендуется только если реальная экономия превышает издержки на дорогу.
-* Разработан реактивный composable `useBasketOptimizer.ts` с автоматическим фоллбэком на синхронный расчет при отсутствии поддержки Web Worker.
-* Написан комплексный юнит-тест `tests/optimizer_test.ts` (пустая корзина, ранжирование одного магазина, мульти-магазинный сплит с учетом трения).
-* Тесты и сборка пройдены успешно (`npm test`, `npm run build`).
+---
 
-### [2026-09-11] Фаза 1. Подфаза 1.3 завершена (ФАЗА 1 ПОЛНОСТЬЮ ЗАВЕРШЕНА)
-* Разработан composable `useDevicePosture.ts` с поддержкой W3C Device Posture API и медиа-запросов `viewport-segments`.
-* Создан двухпанельный компонент `FoldableTwoPane.vue`, поддерживающий:
-  - Вертикальный сгиб (книжка / Dual-Screen): автоматическое разделение на 2 независимые панели с аппаратной зоной сгиба (hinge crease).
-  - Горизонтальный сгиб (Tabletop / Clamshell mode под 90°): верхний экран для графиков/КБЖУ, нижний — для управления.
-  - Десктоп и планшеты: адаптивная Master-Detail сетка.
-* Добавлен интерактивный переключатель режима устройства в шапку (Auto / Fold / Tabletop) для наглядного тестирования на любых экранах.
-* Чистая сборка: `npm run build` пройден без предупреждений и ошибок (37 KB gzip JS).
+## Záznam změn (Changelog)
 
-### [2026-09-11] Фаза 1. Подфаза 1.2 завершена
-* Реализован реактивный движок интернационализации `src/i18n` с нулевым оверхедом.
-* Созданы полные словари для 6 языков: Čeština (CS), Slovenčina (SK), Polski (PL), Deutsch (DE), English (EN), Slovenščina (SL).
-* Добавлено автоопределение языка пользователя (браузер / localStorage) и динамическое форматирование цен в Kč (`formatCurrency`).
-* Разработан эргономичный компонент выпадающего меню `LanguageSelector.vue` с флагами.
-* Успешная сборка: `npm run build` пройден (35 KB gzip для всего приложения с 6 словарями).
+### [2026-09-11] Rebranding & Vektorová ikona Material 3
+* Úspěšný přechod na oficiální českou značku **Regál** (`cz.regal.app`).
+* Vytvořena čistá vektorová SVG ikona (`visací cenovka`) otočená o -14° s otvorem pro zavěšení, symbolem `%` a nápisem `CENA`.
+* Vytvořeny oficiální vrstvy Android Adaptive Icon včetně `ic_launcher_monochrome.xml` pro dynamické přebarvování v Material You (Android 13–17).
+* GitHub repozitář přejmenován na `RandoTeam/Regal`.
 
-### [2026-09-11] Фаза 1. Подфаза 1.1 завершена
-* Инициализирован проект Vite 6 + Vue 3.5 + TypeScript 5.7.
-* Подключен Tailwind CSS v4 с поддержкой CSS Viewport Segments API для Foldables.
-* Интегрирован vite-plugin-pwa (генерация Service Worker и WebManifest).
-* Подключен набор unplugin-icons (Lucide Icons).
-* Успешная компиляция: `npm run build` пройден без ошибок (бандл 26 KB gzip).
+### [2026-09-11] Fáze 5. Podfáze 5.3 dokončena (PROJEKT 100% DOKONČEN)
+* Vytvořen komplexní end-to-end verifikační test `tests/e2e_full_verification_test.ts` testující 9 klíčových systémů aplikace (databáze, 6 jazyků i18n, 13 řetězců, katalog, měrné ceny, oblíbené, košík a Web Worker optimalizátor, nutriční profil, akční letáky, multiplatformní konfigurace).
+* Všech 11 automatizovaných testovacích sad úspěšně prošlo (`npm test`).
+* Úspěšně ověřena produkční kompilace TypeScript a Vite PWA (`npm run build`).
+* Všech 5 fází a 14 podfází technické specifikace plně dokončeno a verifikováno.
 
-### [2026-09-11] Инициация проекта
-* Создан генеральный Roadmap и Pipeline проекта.
-* Утвержден ультра-легкий технологический стек: Vite + Vue 3.5 + TypeScript + Tailwind CSS + Lucide Icons.
-* Подготовлена архитектура поддержки Foldable устройств (CSS Viewport Segments API).
+### [2026-09-11] Fáze 5. Podfáze 5.2 dokončena
+* Připravena konfigurace Capacitor `capacitor.config.ts` (identifikátor `cz.regal.app`, zabezpečené schéma `https`, splash screen `#0f172a`).
+* Vytvořen soubor `android/app/src/main/AndroidManifest.xml` s hardwarovou podporou skládacích zařízení (`android:resizeableActivity="true"`, plynulé zpracování změn orientace a ohybu bez restartu aplikace `smallestScreenSize|screenLayout|orientation`), síťovými oprávněními a deep-link schématy.
+* Připravena desktopová konfigurace Tauri v2:
+  - `src-tauri/tauri.conf.json`: multiplatformní nastavení oken (Windows/macOS/Linux) a striktní CSP pravidla pro bezpečný offline provoz.
+  - `src-tauri/Cargo.toml`: manifest závislostí Tauri 2.0 v jazyce Rust.
+  - `src-tauri/src/main.rs`: vstupní bod desktopové aplikace.
+* Napsán technický test `tests/cross_platform_config_test.ts`.
+
+### [2026-09-11] Fáze 5. Podfáze 5.1 dokončena
+* Nastaven plnohodnotný Service Worker přes Workbox (`vite-plugin-pwa`):
+  - Precache mezipaměť pro 14 klíčových souborů (HTML, JS, CSS, WebManifest, Web Worker).
+  - Runtime mezipaměť externích obrázků (Unsplash, CDN) se strategií `StaleWhileRevalidate`, limitem 100 položek a expirací 30 dní.
+  - Runtime mezipaměť webových fontů se strategií `CacheFirst` (1 rok).
+  - Pravidlo `navigateFallback: '/index.html'` pro 100% offline provoz SPA aplikace.
+* Vygenerovány PWA ikony (`pwa-192x192.png`, `pwa-512x512.png`, `apple-touch-icon.png`) v adresáři `public/`.
+* Doplněn WebManifest: česká lokalizace (`lang: 'cs'`), kategorie (`shopping`, `finance`, `lifestyle`), rychlé zkratky (`Katalog`, `Košík`, `Letáky`).
+* Vytvořen composable `useOnlineStatus.ts` a stavový offline indikátor v horní liště.
+* Napsán test `tests/pwa_offline_test.ts`.
+
+### [2026-09-11] Fáze 4. Podfáze 4.3 dokončena
+* Vytvořena ergonomická komponenta nákupního košíku `BasketView.vue` s podporou adaptivního dvoupanelového rozhraní pro desktop a skládací telefony v Tabletop režimu (ohyb 90°).
+* Implementována úprava množství, rychlé smazání položky, vymazání celého košíku s potvrzením a rychlý přechod do katalogu.
+* Integrován výpočet kombinatorického optimalizátoru na pozadí:
+  - Výběr optimální prodejny pro nákup všeho na jednom místě.
+  - Výpočet rozdělení nákupu do 2 prodejen s volitelnými náklady na dopravu (0 Kč pěšky, 15 Kč MHD, 20 Kč/40 Kč auto).
+  - Zobrazení přehledu, co přesně kde koupit a jaká je čistá finanční úspora.
+* Integrována nutriční karta `NutritionCard.vue` zobrazující celkovou energii, bílkoviny, sacharidy, tuky, vlákninu a žebříček výhodnosti bílkovin.
+* Všechny pohledy aplikace propojeny v `App.vue` (Katalog, Oblíbené, Srovnání, Košík, Letáky).
+* Napsán test `tests/basket_test.ts`.
+
+### [2026-09-11] Fáze 4. Podfáze 4.2 dokončena
+* Vytvořen nutriční modul `src/utils/nutrition.ts` s přesným přepočtem hodnot ze 100 g / 100 ml na reálnou velikost balení a počet kusů v košíku.
+* Výpočet celkové energie v kcal a kJ, bílkovin, sacharidů, tuků a vlákniny.
+* Výpočet procentuálního zastoupení makroživin (4/4/9 kcal na gram).
+* Výpočet ceny za 1 g čisté bílkoviny (`calcPricePerProtein`) a sestavení žebříčku nejvýhodnějších zdrojů bílkovin (`getProteinCostLeaderboard`).
+* Předvolby výživových cílů (Vyvážená strava 2000 kcal, Fitness & Svaly 2500 kcal, Low-Carb / Keto 1800 kcal).
+* Komponenta `NutritionCard.vue` s barevnými ukazateli a rozdělením makroživin.
+* Napsán test `tests/nutrition_test.ts`.
+
+### [2026-09-11] Fáze 4. Podfáze 4.1 dokončena
+* Vyvinut vícevláknový Web Worker `optimizer.worker.ts` s čistým kombinatorickým algoritmem.
+* Hodnocení nákupu v jedné prodejně na základě kompletní dostupnosti a nejnižší ceny.
+* Vyhodnocení rozdělení nákupu do 2 prodejen s ohledem na náklady na přesun (`frictionCostPerExtraStore`).
+* Reaktivní composable `useBasketOptimizer.ts` s fallbackem na synchronní výpočet.
+* Napsán test `tests/optimizer_test.ts`.
+
+### [2026-09-11] Fáze 3 dokončena
+* Vytvořen modul «Oblíbené» (`FavoritesView.vue`) s lokálním ukládáním do IndexedDB.
+* Vytvořen modul «Srovnání produktů» (`CompareView.vue`) pro porovnání až 4 produktů vedle sebe.
+* Vytvořen katalog akčních letáků (`LeafletsView.vue`) s odpočtem platnosti slev.
+* Napsány testy `tests/favorites_test.ts`, `tests/compare_test.ts` a `tests/leaflets_test.ts`.
+
+### [2026-09-11] Fáze 2 dokončena
+* Vytvořeno schéma lokální databáze IndexedDB (`Dexie.js`) pro produkty, ceny, obchody a košík.
+* Připraven katalog 13 českých obchodních řetězců a dataset produktů s EAN-13 kódy a údaji o výrobcích.
+* Implementováno vyhledávání, filtry a produktové karty s přepočtem měrných cen za 1 litr a 1 kilogram.
+* Napsány testy `tests/db_test.ts` a `tests/dataset_test.ts`.
+
+### [2026-09-11] Fáze 1 dokončena
+* Inicializace projektu Vite 6 + Vue 3.5 + TypeScript + Tailwind CSS v4 + Lucide Icons.
+* Lokalizační jádro s 6 jazyky: Čeština (CS), Slovenčina (SK), Polski (PL), Deutsch (DE), English (EN), Slovenščina (SL).
+* Komponenta `FoldableTwoPane.vue` s podporou W3C Device Posture API a zobrazení pro skládací telefony a tablety.
