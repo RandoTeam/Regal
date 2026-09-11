@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-    "test": "tsx tests/db_test.ts && tsx tests/dataset_test.ts"
+    "test": "tsx tests/db_test.ts && tsx tests/dataset_test.ts && tsx tests/favorites_test.ts && tsx tests/compare_test.ts && tsx tests/leaflets_test.ts && tsx tests/optimizer_test.ts"
   },
   "dependencies": {
     "dexie": "^4.0.11",
