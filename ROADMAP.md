@@ -28,12 +28,21 @@
 
 - [ ] **Фаза 5: Офлайн-режим, PWA и кросс-платформенная сборка**
   - [x] **Подфаза 5.1:** Настройка Service Worker, оффлайн-кэширование ассетов и картинок, PWA манифест.
-  - [ ] **Подфаза 5.2:** Конфигурация для сборки Capacitor (Android APK) и Tauri v2 (Desktop Windows/macOS/Linux).
+  - [x] **Подфаза 5.2:** Конфигурация для сборки Capacitor (Android APK) и Tauri v2 (Desktop Windows/macOS/Linux).
   - [ ] **Подфаза 5.3:** Комплексное сквозное тестирование всех форм-факторов и финальная верификация.
 
 ---
 
 ## Журнал изменений (Changelog)
+
+### [2026-09-11] Фаза 5. Подфаза 5.2 завершена
+* Подготовлена конфигурация Capacitor `capacitor.config.ts` (идентификатор приложения `cz.kupiradar.app`, безопасная схема `https`, splash screen `#0f172a`).
+* Сформирован `android/app/src/main/AndroidManifest.xml` с аппаратной поддержкой складных устройств (`android:resizeableActivity="true"`, обработка перегибов и смены ориентации экрана без перезагрузки `smallestScreenSize|screenLayout|orientation`), разрешениями сети и deep-link схемами.
+* Разработана конфигурация десктопной сборки Tauri v2:
+  - `src-tauri/tauri.conf.json`: кросс-платформенные настройки окон (Windows/macOS/Linux), строгие CSP для безопасного локального оффлайн-рендеринга.
+  - `src-tauri/Cargo.toml`: манифест Rust зависимостей Tauri 2.0.
+  - `src-tauri/src/main.rs`: точка входа десктопного приложения с подавлением консольного окна в release.
+* Написан технический тест `tests/cross_platform_config_test.ts`. Все 10 тестовых наборов пройдены (`npm test`), сборка подтверждена (`npm run build`).
 
 ### [2026-09-11] Фаза 5. Подфаза 5.1 завершена
 * Сконфигурирован полнофункциональный Service Worker через Workbox (`vite-plugin-pwa`):
