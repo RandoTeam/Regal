@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --fold-hinge-width: 0px;
+    --fold-hinge-height: 0px;
+  }
+}
+
+/* W3C CSS Viewport Segments for Dual-Screen Foldables */
+@media (horizontal-viewport-segments: 2) {
+  :root {
+    --fold-hinge-width: calc(env(viewport-segment-left 1 0) - env(viewport-segment-right 0 0));
+  }
+}
+
+@media (vertical-viewport-segments: 2) {
+  :root {
+    --fold-hinge-height: calc(env(viewport-segment-top 0 1) - env(viewport-segment-bottom 0 0));
+  }
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
