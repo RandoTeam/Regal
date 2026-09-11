@@ -24,7 +24,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/(images\.unsplash\.com|cdn\..*|.*\.cloudfront\.net)\/.*$/i,
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'kupiradar-external-images',
+              cacheName: 'regal-external-images',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
@@ -39,7 +39,7 @@ export default defineConfig({
             urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'kupiradar-google-fonts',
+              cacheName: 'regal-google-fonts',
               expiration: {
                 maxEntries: 30,
                 maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
@@ -52,8 +52,8 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'KupiRadar Czech Retail — Srovnávač a Košík',
-        short_name: 'KupiRadar',
+        name: 'Regál — Srovnávač cen a nákupní košík ČR',
+        short_name: 'Regál',
         description: 'Srovnávač cen a optimalizátor nákupního košíku pro Českou republiku',
         theme_color: '#0f172a',
         background_color: '#ffffff',

@@ -2,7 +2,7 @@ import type { TranslationSchema } from '../types';
 
 export const de: TranslationSchema = {
   app: {
-    title: 'KupiRadar',
+    title: 'Regál',
     subtitle: 'Preisvergleich und Warenkorb-Optimierer für Tschechien',
     region_label: 'Standort',
     all_regions: 'Ganz Tschechien (alle Geschäfte)',

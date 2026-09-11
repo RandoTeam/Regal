@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "KupiRadar",
+  "productName": "Regal",
   "version": "1.0.0",
-  "identifier": "cz.kupiradar.app",
+  "identifier": "cz.regal.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "KupiRadar — Srovnávač cen a optimalizátor nákupního košíku ČR",
+        "title": "Regál — Srovnávač cen a nákupní košík ČR",
         "width": 1280,
         "height": 820,
         "minWidth": 380,

@@ -1,8 +1,8 @@
 [package]
-name = "kupiradar"
+name = "regal"
 version = "1.0.0"
-description = "KupiRadar Desktop — Czech Retail Price Comparison & Basket Optimizer"
-authors = ["KupiRadar Team"]
+description = "Regál Desktop — Czech Retail Price Comparison & Basket Optimizer"
+authors = ["Regál Team"]
 edition = "2021"
 
 [build-dependencies]

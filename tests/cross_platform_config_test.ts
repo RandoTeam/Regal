@@ -12,13 +12,13 @@ async function runTest() {
     throw new Error('capacitor.config.ts does not exist');
   }
   const capContent = fs.readFileSync(capConfigPath, 'utf-8');
-  if (!capContent.includes("appId: 'cz.kupiradar.app'")) {
-    throw new Error('Capacitor appId cz.kupiradar.app not set');
+  if (!capContent.includes("appId: 'cz.regal.app'")) {
+    throw new Error('Capacitor appId cz.regal.app not set');
   }
   if (!capContent.includes("webDir: 'dist'")) {
     throw new Error("Capacitor webDir 'dist' not set");
   }
-  console.log('✓ Test 1: Capacitor configuration (Android package cz.kupiradar.app) verified');
+  console.log('✓ Test 1: Capacitor configuration (Android package cz.regal.app) verified');
 
   // 2. Android Manifest & Foldable Support
   const manifestPath = path.join(rootDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
@@ -43,8 +43,8 @@ async function runTest() {
     throw new Error('src-tauri/tauri.conf.json does not exist');
   }
   const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, 'utf-8'));
-  if (tauriConf.identifier !== 'cz.kupiradar.app') {
-    throw new Error(`Expected Tauri identifier cz.kupiradar.app, got ${tauriConf.identifier}`);
+  if (tauriConf.identifier !== 'cz.regal.app') {
+    throw new Error(`Expected Tauri identifier cz.regal.app, got ${tauriConf.identifier}`);
   }
   if (tauriConf.build?.frontendDist !== '../dist') {
     throw new Error(`Expected frontendDist ../dist, got ${tauriConf.build?.frontendDist}`);

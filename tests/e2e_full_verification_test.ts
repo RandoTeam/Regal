@@ -20,7 +20,7 @@ import { CZECH_RETAIL_CHAINS } from '../src/data/chains';
 
 async function runE2EVerification() {
   console.log('===============================================================');
-  console.log('🏁 KUPI-RADAR: FULL END-TO-END SYSTEM VERIFICATION SUITE');
+  console.log('🏁 REGÁL: FULL END-TO-END SYSTEM VERIFICATION SUITE');
   console.log('===============================================================');
 
   // STEP 1: Database Initialization

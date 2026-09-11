@@ -150,7 +150,7 @@ onMounted(() => {
     <header class="border-b border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-900/85 backdrop-blur sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-lg shadow-sm shadow-emerald-500/20">
-          K
+          R
         </div>
         <div>
           <h1 class="text-base font-bold tracking-tight flex items-center">

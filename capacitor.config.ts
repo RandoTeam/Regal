@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'cz.kupiradar.app',
-  appName: 'KupiRadar',
+  appId: 'cz.regal.app',
+  appName: 'Regál',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
